@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.seckill.dao.SuccessKilledDao">
+    <insert id="insertSuccessKilled">
+        <!--主键冲突，就会报错（这个表用复合主键）-->
+        INSERT ignore INTO success_killed(seckill_id, user_phone, create_time)
+        VALUES (#{seckillId}, #{userPhone}, #{createTime})
+    </insert>
+    <select id="queryByIdWithSeckill" resultType="SuccessKilled">
+        <!--根据id查询秒杀单并携带商品实体-->
+        <!--语句简单，关键是要告诉mybatis如何将找到结果orm到秒杀单这个对象（主要是里面的商品属性）-->
+        <!--如下的AS。将找到的值告诉mybatis赋值给对应的属性里的属性-->
+        <!--mybatis最大的好处，可以自由控制SQL语句，可以让大手子搞起来-->
+        SELECT
+          sk.seckill_id,
+          sk.user_phone,
+          sk.create_time,
+          sk.state,
+          s.seckill_id AS "seckill.seckill_id",
+          s.name AS "seckill.name",
+          s.number AS "seckill.number",
+          s.start_time AS "seckill.start_time",
+          s.end_time AS "seckill.end_time",
+          s.create_time AS "seckill.create_time"
+        FROM success_killed AS sk
+        INNER JOIN seckill AS s on sk.seckill_id = s.seckill_id
+        WHERE sk.seckill_id = #{seckillId} AND sk.user_phone = #{userPhone}
+    </select>
+</mapper>
